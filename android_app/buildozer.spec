@@ -6,10 +6,9 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
 version = 1.0
 
-# 核心依赖
-# musicdl 会自动引入其子依赖
-# 以下排除无法在 ARM 上编译的包: av, curl-cffi, orjson, nodejs-wheel, pywidevine
-requirements = python3,kivy==2.3.0,musicdl,requests,urllib3,certifi,charset-normalizer,idna
+# musicdl 已放入项目源码 (android_app/musicdl/)，不在 requirements 中安装
+# 单独列出所有可在 ARM 上编译的依赖（排除 av, curl-cffi, orjson, pywidevine, nodejs-wheel）
+requirements = python3,kivy==2.3.0,requests,urllib3,certifi,charset-normalizer,idna,beautifulsoup4,soupsieve,click,lxml,mutagen,pycryptodomex,cryptography,cffi,pycparser,protobuf,platformdirs,rich,pygments,pyyaml,unidecode,tabulate,colorama,fake-useragent,emoji,bleach,webencodings,tinytag,filetype,puremagic,json-repair,pathvalidate,aigpy,construct,m3u8,ytmusicapi,pymp4,prompt-toolkit,wcwidth,brotli,markdown-it-py,mdurl
 
 orientation = portrait
 fullscreen = 0
@@ -23,7 +22,6 @@ android.ndk = 25b
 android.archs = arm64-v8a
 android.accept_sdk_license = True
 android.sdk_path = /usr/local/lib/android/sdk
-android.ndk_path = /usr/local/lib/android/sdk/ndk/27.3.13750724
 android.gradle_dependencies =
 android.allow_backup = True
 android.entrypoint = org.kivy.android.PythonActivity
