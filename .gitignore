@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+output/
+bin/
+build/
+.buildozer/
+*.apk
+*.aab
+*.keystore
+*.log
+.DS_Store
+Thumbs.db
+*.exe
+已下载音乐/
