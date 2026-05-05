@@ -12,10 +12,6 @@ jobs:
       run:
         working-directory: android_app
 
-    env:
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
-      ANDROID_HOME: /usr/local/lib/android/sdk
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,16 +34,28 @@ jobs:
             pkg-config zip unzip libltdl-dev cmake ninja-build \
             libffi-dev libssl-dev zlib1g-dev
 
-      - name: Install Android build-tools
+      - name: Fix Android SDK structure for p4a
         run: |
-          # Ensure Android SDK build-tools (includes aidl) are installed
-          if [ -d "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" ]; then
-            yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-            $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-34" 2>&1 || true
+          # p4a looks for sdkmanager in old path tools/bin/sdkmanager
+          # but modern SDK puts it in cmdline-tools/latest/bin/
+          SDK=/usr/local/lib/android/sdk
+          if [ -f "$SDK/cmdline-tools/latest/bin/sdkmanager" ]; then
+            mkdir -p "$SDK/tools/bin"
+            ln -sf "$SDK/cmdline-tools/latest/bin/sdkmanager" "$SDK/tools/bin/sdkmanager"
+            # Also symlink other tools that p4a might need
+            for tool in avdmanager lint apksigner; do
+              [ -f "$SDK/cmdline-tools/latest/bin/$tool" ] && ln -sf "$SDK/cmdline-tools/latest/bin/$tool" "$SDK/tools/bin/$tool"
+            done
+            echo "Symlinks created to tools/bin/"
           fi
-          # Verify aidl is accessible
-          find $ANDROID_SDK_ROOT -name "aidl" -type f 2>/dev/null || echo "aidl not in SDK"
-          which aidl 2>/dev/null || echo "aidl not in PATH"
+          # Also ensure build-tools are installed
+          if [ -f "$SDK/cmdline-tools/latest/bin/sdkmanager" ]; then
+            yes | $SDK/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
+            $SDK/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0" "platforms;android-33" 2>&1 || true
+          fi
+          # Verify
+          ls -la "$SDK/tools/bin/" 2>/dev/null || echo "tools/bin not found"
+          find "$SDK" -name "aidl" -type f 2>/dev/null | head -5
 
       - name: Install Python build tools
         run: |
@@ -60,9 +68,9 @@ jobs:
           path: |
             ~/.buildozer
             android_app/.buildozer
-          key: buildozer-v5-${{ hashFiles('android_app/buildozer.spec') }}
+          key: buildozer-v6-${{ hashFiles('android_app/buildozer.spec') }}
           restore-keys: |
-            buildozer-v5-
+            buildozer-v6-
 
       - name: Build APK
         run: buildozer android debug 2>&1 | tee build.log
