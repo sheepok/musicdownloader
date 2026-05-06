@@ -68,16 +68,21 @@ jobs:
           path: |
             ~/.buildozer
             android_app/.buildozer
-          key: buildozer-v6-${{ hashFiles('android_app/buildozer.spec') }}
+          key: buildozer-v7-${{ hashFiles('android_app/buildozer.spec') }}
           restore-keys: |
             buildozer-v6-
 
       - name: Build APK
         run: buildozer android debug 2>&1 | tee build.log
 
-      - name: Show tail of build log on failure
+      - name: Show errors on failure
         if: failure()
-        run: tail -300 build.log
+        run: |
+          echo "========== CRITICAL ERRORS (grep) =========="
+          grep -i -E "error:|failed:|exception:|traceback|not found|no such|cannot|fatal" build.log | head -50 || echo "(no matching lines)"
+          echo ""
+          echo "========== LAST 500 LINES =========="
+          tail -500 build.log
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
