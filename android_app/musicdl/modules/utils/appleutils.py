@@ -24,10 +24,13 @@ from mutagen.mp4 import MP4
 from xml.etree import ElementTree
 from dataclasses import dataclass
 from platformdirs import user_log_dir
-from pywidevine import PSSH, Cdm, Device
 from urllib.parse import parse_qs, urlparse
 from .misc import safeextractfromdict, resp2json
-from pywidevine.license_protocol_pb2 import WidevinePsshData
+try:
+    from pywidevine import PSSH, Cdm, Device
+    from pywidevine.license_protocol_pb2 import WidevinePsshData
+except ImportError:
+    PSSH = Cdm = Device = WidevinePsshData = None
 from .cmd import NM3U8DLREDownloadCommand, MP4BoxAddCommand, FFmpegDecryptRemuxCommand, AmdecryptCommand, Mp4DecryptCommand
 
 

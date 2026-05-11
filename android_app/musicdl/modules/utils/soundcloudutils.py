@@ -9,10 +9,13 @@ WeChat Official Account (微信公众号):
 import re
 import requests
 from pathlib import Path
-from pywidevine.cdm import Cdm
 from urllib.parse import urljoin
-from pywidevine.pssh import PSSH
-from pywidevine.device import Device
+try:
+    from pywidevine.cdm import Cdm
+    from pywidevine.pssh import PSSH
+    from pywidevine.device import Device
+except ImportError:
+    Cdm = PSSH = Device = None
 
 
 '''SoundCloudMusicClientUtils'''

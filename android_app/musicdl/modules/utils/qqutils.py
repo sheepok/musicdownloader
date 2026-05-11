@@ -17,12 +17,12 @@ import json as _json
 # fallback for orjson on platforms where it can't be built (e.g. Android ARM)
 def _fast_dumps(obj):
     if orjson is not None:
-        return _fast_dumps(obj)
+        return orjson.dumps(obj)
     return _json.dumps(obj, separators=(",", ":")).encode()
 
 def _fast_loads(data):
     if orjson is not None:
-        return _fast_loads(data)
+        return orjson.loads(data)
     return _json.loads(data)
 
 import base64
